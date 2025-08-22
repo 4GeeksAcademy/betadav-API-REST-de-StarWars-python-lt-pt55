@@ -17,3 +17,39 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+
+class Character(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    height: Mapped[int] = mapped_column(nullable=False)
+    gender: Mapped[str] = mapped_column(nullable=False)
+    eyes_color: Mapped[str] = mapped_column(nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "height": self.height,
+            "gender": self.gender,
+            "eyes_color": self.eyes_color
+            # do not serialize the password, its a security breach
+        }
+    
+class Planet(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    diameter: Mapped[int] = mapped_column(nullable=False)
+    climate: Mapped[str] = mapped_column(nullable=False)
+    terrain: Mapped[str] = mapped_column(nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "diameter": self.diameter,
+            "climate": self.climate,
+            "terrain": self.terrain
+            # do not serialize the password, its a security breach
+        }
+    
+    		
