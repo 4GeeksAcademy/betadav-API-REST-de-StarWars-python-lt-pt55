@@ -48,7 +48,6 @@ def get_users():
         "msg": "Estos son los usuarios",
         "users": results
     }
-
     return jsonify(response_body), 200
     
 
@@ -77,6 +76,34 @@ def get_planet(planet_id):
     planet = Planet.query.filter_by(id=planet_id).first()
 
     return jsonify(planet.serialize()), 200
+
+@app.route('/planet', methods=['POST'])
+def add_planet():
+    body = request.get_json()
+    planet = Planet(**body)
+    db.session.add(planet)
+    db.session.commit()
+
+    response_body = {
+        "msg": "planet ",
+        "planet": planet.serialize() 
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/character', methods=['POST'])
+def add_character():
+    body = request.get_json()
+    character = Character(**body)
+    db.session.add(character)
+    db.session.commit()
+
+    response_body = {
+        "msg": "character ",
+        "planet": character.serialize() 
+    }
+
+    return jsonify(response_body), 200
 
 
 # this only runs if `$ python src/app.py` is executed
