@@ -85,8 +85,7 @@ def add_planet():
     db.session.commit()
 
     response_body = {
-        "msg": "planet ",
-        "planet": planet.serialize() 
+        "planet created succesfully": planet.serialize() 
     }
 
     return jsonify(response_body), 200
@@ -99,11 +98,33 @@ def add_character():
     db.session.commit()
 
     response_body = {
-        "msg": "character ",
-        "planet": character.serialize() 
+        "character created succesfully": character.serialize() 
     }
 
     return jsonify(response_body), 200
+
+# @app.route('/user/favorites', methods=['GET'])
+# def get_favorites():
+#     print(get_favorites)
+#     all_planets = Planet.query.all()
+#     results = list(map(lambda planet: planet.serialize() ,all_planets))
+
+#     return jsonify(results), 200
+
+# @app.route('/favorite_character/character/<int:character_id>', methods=['POST'])
+# def add_favorite_character():
+#     print(add_favorite_character)
+#     # body = request.get_json()
+#     # print(body)
+#     # character = Character(**body)
+#     # db.session.add(character)
+#     # db.session.commit()
+
+#     response_body = {
+#         "character added succesfully" 
+#     }
+
+#     return jsonify(response_body), 200
 
 
 # this only runs if `$ python src/app.py` is executed
