@@ -7,9 +7,9 @@ class FavoriteCharacterAdmin(ModelView):
     column_list = ('id', 'user', 'character')
     form_columns = ('user', 'character')
 
-# class FavoritePlanetAdmin(ModelView):
-#     column_list = ('id', 'name', 'user_id', 'planet_id')
-#     form_columns = ('name', 'user_id', 'planet_id')
+class FavoritePlanetAdmin(ModelView):
+    column_list = ('id', 'user', 'planet')
+    form_columns = ('user', 'planet')
 
 def setup_admin(app):
     app.secret_key = os.environ.get('FLASK_APP_KEY', 'sample key')
@@ -24,7 +24,7 @@ def setup_admin(app):
     # admin.add_view(ModelView(FavoriteCharacter, db.session))
     # admin.add_view(ModelView(FavoritePlanet, db.session))
     admin.add_view(FavoriteCharacterAdmin(FavoriteCharacter, db.session))
-    # admin.add_view(FavoritePlanetAdmin(FavoritePlanet, db.session))
+    admin.add_view(FavoritePlanetAdmin(FavoritePlanet, db.session))
 
     # You can duplicate that line to add mew models
     # admin.add_view(ModelView(YourModelName, db.session))
