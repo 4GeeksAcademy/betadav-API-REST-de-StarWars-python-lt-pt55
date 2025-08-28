@@ -9,6 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Character, Planet, FavoriteCharacter, FavoritePlanet
+from sqlalchemy import select
 # from models import Person
 
 app = Flask(__name__)
@@ -118,46 +119,100 @@ def add_character():
 
 @app.route('/user/<int:user_id>/favorite_character', methods=['GET'])
 def get_favorite_character(user_id):
-    all_favorite_characters = FavoriteCharacter.query.filter_by(user_id = user_id).all()
-    results = list(map(lambda favorite_character: favorite_character.serialize(), all_favorite_characters))
+    all_favorite_characters = FavoriteCharacter.query.filter_by(
+        user_id=user_id).all()
+    results = list(map(lambda favorite_character: favorite_character.serialize(
+    ), all_favorite_characters))
 
     return jsonify(results), 200
 
+
 @app.route('/user/<int:user_id>/favorite_planet', methods=['GET'])
 def get_favorite_planet(user_id):
-    all_favorite_planets = FavoritePlanet.query.filter_by(user_id = user_id).all()
-    results = list(map(lambda favorite_planet: favorite_planet.serialize(), all_favorite_planets))
+    all_favorite_planets = FavoritePlanet.query.filter_by(
+        user_id=user_id).all()
+    results = list(
+        map(lambda favorite_planet: favorite_planet.serialize(), all_favorite_planets))
 
     return jsonify(results), 200
 
 
 @app.route('/user/<int:user_id>/favorite_character/character/<int:id>', methods=['POST'])
-def add_favorite_character(user_id,id):
-    print(add_favorite_character)
-    # user = User.query.get(user_id)
-    # character = Character.query.get(id)
+def add_favorite_character(user_id, id):
+    user = User.query.get(user_id)
+    character = Character.query.get(id)
 
-    # if id is id:
-    #     return jsonify({"Error":"Character already exist"})
-    new_favorite_character = FavoriteCharacter(user_id = user_id, character_id = id)
+    if not user or not character:
+        return jsonify({"msg": "User or Character not found"}), 404
+    
+    existing_favorite_character = FavoriteCharacter.query.filter_by(
+        user_id=user_id, character_id=id).first()
+
+    if existing_favorite_character:
+        return jsonify({"msg": "Character already exists in favorites"}), 409
+    
+    new_favorite_character = FavoriteCharacter(
+        user_id=user_id, character_id=id)
+    
     db.session.add(new_favorite_character)
     db.session.commit()
 
     return jsonify(new_favorite_character.serialize()), 200
 
-@app.route('/user/<int:user_id>/favorite_planet/planet/<int:id>', methods=['POST'])
-def add_favorite_planet(user_id,id):
-    print(add_favorite_planet)
-    # user = User.query.get(user_id)
-    # planet = Planet.query.get(id)
 
-    # if id is id:
-    #     return jsonify({"Error":"Planet already exist"})
-    new_favorite_planet = FavoritePlanet(user_id = user_id, planet_id = id)
+@app.route('/user/<int:user_id>/favorite_planet/planet/<int:id>', methods=['POST'])
+def add_favorite_planet(user_id, id):
+    user = User.query.get(user_id)
+    planet = Planet.query.get(id)
+
+    if not user or not planet:
+        return jsonify({"msg": "User or Planet not found"}), 404
+
+    existing_favorite_planet = FavoritePlanet.query.filter_by(
+        user_id=user_id, planet_id=id).first()
+
+    if existing_favorite_planet:
+        return jsonify({"msg": "Planet already exists in favorites"}), 409
+
+    new_favorite_planet = FavoritePlanet(user_id=user_id, planet_id=id)
+
     db.session.add(new_favorite_planet)
     db.session.commit()
 
     return jsonify(new_favorite_planet.serialize()), 200
+
+
+@app.route('/favorite_planet/planet/<int:planet_id>', methods=['DELETE'])
+def delete_planet(planet_id):
+    favorite_planet = db.session.execute(select(FavoritePlanet).where(
+        FavoritePlanet.planet_id == planet_id, FavoritePlanet.user_id == 1)).scalar_one_or_none()
+    if favorite_planet is None:
+        return "relationship not founded"
+
+    db.session.delete(favorite_planet)
+    db.session.commit()
+
+    response_body = {
+        "msg": "Planet nro " + str(favorite_planet.planet_id) + ", was successfully deleted"
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/favorite_character/character/<int:character_id>', methods=['DELETE'])
+def delete_character(character_id):
+    favorite_character = db.session.execute(select(FavoriteCharacter).where(
+        FavoriteCharacter.character_id == character_id, FavoriteCharacter.user_id == 1)).scalar_one_or_none()
+    if favorite_character is None:
+        return "relationship not founded"
+
+    db.session.delete(favorite_character)
+    db.session.commit()
+
+    response_body = {
+        "msg": "Character nro " + str(favorite_character.character_id) + ", was successfully deleted"
+    }
+
+    return jsonify(response_body), 200
 
 
 # this only runs if `$ python src/app.py` is executed
